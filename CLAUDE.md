@@ -49,6 +49,19 @@ PGPASSWORD=<password> psql -h dsc10-tutor-logs-dev -U postgres -d dsc10_tutor_lo
 PGPASSWORD=<password> psql -h dsc10-tutor-logs-dev-pooler -U postgres -d dsc10_tutor_logs
 ```
 
+### Dump DB to Parquet
+```bash
+# Port-forward directly to the pod (service has no selector, so can't forward to svc)
+kubectl port-forward pod/dsc10-tutor-logs-dev-0 5433:5432 -n dsc-10-llm &
+
+# Run the dump script (uses api/ project deps)
+DB_HOST=localhost DB_PORT=5433 DB_NAME=dsc10_tutor_logs DB_USER=dsc10_tutor DB_PASSWORD=<password> \
+  uv run --project api python api/dump_to_parquet.py events_dev.parquet
+
+# Kill the port-forward when done
+kill %1
+```
+
 ### Logs
 ```bash
 kubectl logs dsc10-tutor-logs-dev-0 -n dsc-10-llm
