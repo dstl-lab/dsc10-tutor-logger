@@ -10,4 +10,5 @@ async def connect() -> asyncpg.Connection:
         database=os.environ["DB_NAME"],
         user=os.environ["DB_USER"],
         password=os.environ["DB_PASSWORD"],
+        statement_cache_size=0,
     )
