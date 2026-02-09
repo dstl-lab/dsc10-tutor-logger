@@ -10,27 +10,27 @@ Logging API and PostgreSQL database for the DSC 10 AI Tutor. Deployed on the [Na
 
 ```
 GitHub (main) ──mirror──> GitLab CI ──kaniko──> GitLab Container Registry
-                                                        │
-Nautilus cluster (namespace: dsc-10-llm)                │
+                                                         │
+Nautilus cluster (namespace: dsc-10-llm)                 │
 ┌───────────────────────────────────────────────────────┐│
-│  Ingress ──> Service ──> API Deployment ──────────────┘│
-│                              │                         │
-│                          PgBouncer ──> PostgreSQL       │
+│  Ingress ──> Service ──> API Deployment <─────────────┼┘
+│                              │                        │
+│                          PgBouncer ──> PostgreSQL     │
 └───────────────────────────────────────────────────────┘
 ```
 
 ## Files
 
-| File | Description |
-|------|-------------|
-| `api/` | FastAPI application (source, Dockerfile, dependencies) |
-| `api/dump_to_parquet.py` | Script to dump the events table to a Parquet file |
-| `api/.env.example` | Template for database connection env vars |
-| `schema.sql` | Database schema (events table + indexes) |
-| `dev.yml` | Kubernetes manifest for **dev** (1 Postgres instance, 2 Gi storage, 1 API replica) |
-| `prod.yml` | Kubernetes manifest for **prod** (2 Postgres instances, 20 Gi storage, 2 API replicas) |
-| `.gitlab-ci.yml` | CI pipeline that builds and pushes the API image |
-| `.github/workflows/mirror-to-gitlab.yml` | GitHub Action that mirrors pushes to GitLab |
+| File                                     | Description                                                                            |
+| ---------------------------------------- | -------------------------------------------------------------------------------------- |
+| `api/`                                   | FastAPI application (source, Dockerfile, dependencies)                                 |
+| `api/dump_to_parquet.py`                 | Script to dump the events table to a Parquet file                                      |
+| `api/.env.example`                       | Template for database connection env vars                                              |
+| `schema.sql`                             | Database schema (events table + indexes)                                               |
+| `dev.yml`                                | Kubernetes manifest for **dev** (1 Postgres instance, 2 Gi storage, 1 API replica)     |
+| `prod.yml`                               | Kubernetes manifest for **prod** (2 Postgres instances, 20 Gi storage, 2 API replicas) |
+| `.gitlab-ci.yml`                         | CI pipeline that builds and pushes the API image                                       |
+| `.github/workflows/mirror-to-gitlab.yml` | GitHub Action that mirrors pushes to GitLab                                            |
 
 ## API
 
@@ -46,16 +46,16 @@ curl -X POST https://dsc10-tutor-logging-api-dev.nrp-nautilus.io/events \
 
 **Request body:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `event_type` | string | yes | Event category |
-| `user_email` | string | no | User identifier |
-| `payload` | object | no | Arbitrary JSON data (default `{}`) |
+| Field        | Type   | Required | Description                        |
+| ------------ | ------ | -------- | ---------------------------------- |
+| `event_type` | string | yes      | Event category                     |
+| `user_email` | string | no       | User identifier                    |
+| `payload`    | object | no       | Arbitrary JSON data (default `{}`) |
 
 **Response** (`201`):
 
 ```json
-{"id": 1, "created_at": "2026-02-09T01:19:19.280176+00:00"}
+{ "id": 1, "created_at": "2026-02-09T01:19:19.280176+00:00" }
 ```
 
 ### `GET /health`
@@ -99,9 +99,9 @@ Define the API base URL for each environment:
 
 ```typescript
 const LOG_API =
-  process.env.NODE_ENV === "production"
-    ? "https://dsc10-tutor-logging-api.nrp-nautilus.io"
-    : "https://dsc10-tutor-logging-api-dev.nrp-nautilus.io";
+  process.env.NODE_ENV === 'production'
+    ? 'https://dsc10-tutor-logging-api.nrp-nautilus.io'
+    : 'https://dsc10-tutor-logging-api-dev.nrp-nautilus.io';
 ```
 
 ### Logging an event
@@ -116,16 +116,16 @@ interface LogEvent {
 async function logEvent(event: LogEvent): Promise<void> {
   try {
     const res = await fetch(`${LOG_API}/events`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(event),
     });
     if (!res.ok) {
-      console.error("Failed to log event:", res.status, await res.text());
+      console.error('Failed to log event:', res.status, await res.text());
     }
   } catch (err) {
     // Fire-and-forget — don't let logging errors break the app
-    console.error("Failed to log event:", err);
+    console.error('Failed to log event:', err);
   }
 }
 ```
@@ -135,18 +135,18 @@ async function logEvent(event: LogEvent): Promise<void> {
 ```typescript
 // Log a tutor query
 await logEvent({
-  event_type: "tutor_query",
-  user_email: "student@ucsd.edu",
+  event_type: 'tutor_query',
+  user_email: 'student@ucsd.edu',
   payload: {
-    question: "How do I filter a DataFrame?",
-    assignment: "hw3",
+    question: 'How do I filter a DataFrame?',
+    assignment: 'hw3',
   },
 });
 
 // Log a UI interaction (no email needed)
 logEvent({
-  event_type: "button_click",
-  payload: { button: "show_hint", problem: 4 },
+  event_type: 'button_click',
+  payload: { button: 'show_hint', problem: 4 },
 });
 ```
 
@@ -181,7 +181,7 @@ kubectl run -i --tty --rm debug --image=postgres:14 --restart=Never -n dsc-10-ll
 
 ## Endpoints
 
-| Environment | API URL | DB Service (internal) |
-|---|---|---|
-| Dev | `https://dsc10-tutor-logging-api-dev.nrp-nautilus.io` | `dsc10-tutor-logs-dev-pooler.dsc-10-llm.svc.cluster.local:5432` |
-| Prod | `https://dsc10-tutor-logging-api.nrp-nautilus.io` | `dsc10-tutor-logs-prod-pooler.dsc-10-llm.svc.cluster.local:5432` |
+| Environment | API URL                                               | DB Service (internal)                                            |
+| ----------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
+| Dev         | `https://dsc10-tutor-logging-api-dev.nrp-nautilus.io` | `dsc10-tutor-logs-dev-pooler.dsc-10-llm.svc.cluster.local:5432`  |
+| Prod        | `https://dsc10-tutor-logging-api.nrp-nautilus.io`     | `dsc10-tutor-logs-prod-pooler.dsc-10-llm.svc.cluster.local:5432` |
