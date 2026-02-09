@@ -185,3 +185,8 @@ kubectl run -i --tty --rm debug --image=postgres:14 --restart=Never -n dsc-10-ll
 | ----------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
 | Dev         | `https://dsc10-tutor-logging-api-dev.nrp-nautilus.io` | `dsc10-tutor-logs-dev-pooler.dsc-10-llm.svc.cluster.local:5432`  |
 | Prod        | `https://dsc10-tutor-logging-api.nrp-nautilus.io`     | `dsc10-tutor-logs-prod-pooler.dsc-10-llm.svc.cluster.local:5432` |
+
+## Monitoring
+
+See the Grafana dashboard to monitor CPU/RAM usage: https://grafana.nrp-nautilus.io/d/85a562078cdf77779eaa1add43ccec1e/kubernetes-compute-resources-namespace-pods?orgId=1&from=now-1h&to=now&timezone=UTC&var-datasource=default&var-cluster&var-namespace=dsc-10-llm&refresh=10s 
+
