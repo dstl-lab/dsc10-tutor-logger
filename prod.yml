@@ -1,9 +1,9 @@
-apiVersion: "acid.zalan.do/v1"
-kind: "postgresql"
+apiVersion: 'acid.zalan.do/v1'
+kind: 'postgresql'
 metadata:
-  name: "dsc10-tutor-logs-prod"
+  name: 'dsc10-tutor-logs-prod'
 spec:
-  teamId: "dsc10"
+  teamId: 'dsc10'
   volume:
     size: 20Gi
     storageClass: linstor-igrok
@@ -15,15 +15,24 @@ spec:
   databases:
     dsc10_tutor_logs: dsc10_tutor
   postgresql:
-    version: "14"
+    version: '14'
   enableConnectionPooler: true
   resources:
     requests:
-      cpu: "1"
-      memory: "4Gi"
+      cpu: '1'
+      memory: '4Gi'
     limits:
-      cpu: "2"
-      memory: "8Gi"
+      cpu: '2'
+      memory: '8Gi'
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: topology.kubernetes.io/zone
+              operator: In
+              values:
+                - ucsd
+                - ucsd-sdsc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -39,6 +48,16 @@ spec:
       labels:
         app: dsc10-tutor-logging-api-prod
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/zone
+                    operator: In
+                    values:
+                      - ucsd
+                      - ucsd-sdsc
       containers:
         - name: api
           image: gitlab-registry.nrp-nautilus.io/samlau95/dsc10-tutor-logger/api:latest
@@ -46,16 +65,16 @@ spec:
             - containerPort: 8000
           resources:
             requests:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: '500m'
+              memory: '1Gi'
             limits:
-              cpu: "1"
-              memory: "2Gi"
+              cpu: '1'
+              memory: '2Gi'
           env:
             - name: DB_HOST
               value: dsc10-tutor-logs-prod-pooler
             - name: DB_PORT
-              value: "5432"
+              value: '5432'
             - name: DB_NAME
               value: dsc10_tutor_logs
             - name: DB_USER
