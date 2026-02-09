@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from db import close_pool, get_pool, init_pool
 from models import EventIn
@@ -14,6 +15,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="DSC 10 Tutor Logging API", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"^https?://(localhost(:\d+)?|.*\.localhost(:\d+)?|datahub\.ucsd\.edu)$",
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.post("/events", status_code=201)
