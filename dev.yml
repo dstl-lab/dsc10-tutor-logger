@@ -50,7 +50,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/ucsd-dsc10/dsc10-tutor-logging-api:dev
+          image: gitlab-registry.nrp-nautilus.io/samlau95/dsc10-tutor-logger/api:latest
           ports:
             - containerPort: 8000
           resources:
