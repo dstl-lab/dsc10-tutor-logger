@@ -14,6 +14,7 @@
 ## Common Commands
 
 ### Deploy / teardown
+
 ```bash
 # Apply
 kubectl apply -n dsc-10-llm -f dev.yml
@@ -29,15 +30,17 @@ kubectl get pvc -n dsc-10-llm
 ```
 
 ### Get password
+
 ```bash
 # Dev
-kubectl get secret postgres.dsc10-tutor-logs-dev.credentials.postgresql.acid.zalan.do -n dsc-10-llm -o 'jsonpath={.data.password}' | base64 -d
+kubectl get secret dsc10-tutor.dsc10-tutor-logs-dev.credentials.postgresql.acid.zalan.do -n dsc-10-llm -o 'jsonpath={.data.password}' | base64 -d
 
 # Prod
-kubectl get secret postgres.dsc10-tutor-logs-prod.credentials.postgresql.acid.zalan.do -n dsc-10-llm -o 'jsonpath={.data.password}' | base64 -d
+kubectl get secret dsc10-tutor.dsc10-tutor-logs-prod.credentials.postgresql.acid.zalan.do -n dsc-10-llm -o 'jsonpath={.data.password}' | base64 -d
 ```
 
 ### Connect via psql
+
 ```bash
 # Start a debug pod
 kubectl run -i --tty --rm debug --image=postgres -- bash
@@ -50,6 +53,7 @@ PGPASSWORD=<password> psql -h dsc10-tutor-logs-dev-pooler -U postgres -d dsc10_t
 ```
 
 ### Dump DB to Parquet
+
 ```bash
 # Port-forward directly to the pod (service has no selector, so can't forward to svc)
 kubectl port-forward pod/dsc10-tutor-logs-dev-0 5433:5432 -n dsc-10-llm &
@@ -63,6 +67,7 @@ kill %1
 ```
 
 ### Logs
+
 ```bash
 kubectl logs dsc10-tutor-logs-dev-0 -n dsc-10-llm
 ```
