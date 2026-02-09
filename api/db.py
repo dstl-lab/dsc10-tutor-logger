@@ -13,8 +13,9 @@ async def init_pool() -> asyncpg.Pool:
         database=os.environ["DB_NAME"],
         user=os.environ["DB_USER"],
         password=os.environ["DB_PASSWORD"],
-        min_size=1,
+        min_size=0,
         max_size=5,
+        max_inactive_connection_lifetime=30.0,
     )
     return pool
 
