@@ -5,7 +5,7 @@ metadata:
 spec:
   teamId: 'dsc10'
   volume:
-    size: 20Gi
+    size: 10Gi
     storageClass: linstor-igrok
   numberOfInstances: 2
   users:
