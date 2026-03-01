@@ -8,4 +8,5 @@ dependencies = [
     "asyncpg",
     "pyarrow>=23.0.0",
     "python-dotenv>=1.2.1",
+    "python-multipart>=0.0.22",
 ]

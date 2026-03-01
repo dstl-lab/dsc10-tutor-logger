@@ -1,10 +1,13 @@
+import hashlib
+import hmac
 import json
+import os
 from html import escape
 from urllib.parse import quote
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Cookie, FastAPI, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from db import connect
 from models import EventIn
@@ -80,8 +83,44 @@ def _html_page(title: str, body: str) -> str:
     )
 
 
+def _make_token(password: str) -> str:
+    return hmac.HMAC(b"dsc10-dashboard", password.encode(), hashlib.sha256).hexdigest()
+
+
+def _check_auth(token: str | None) -> bool:
+    if not token:
+        return False
+    expected = _make_token(os.environ["DB_PASSWORD"])
+    return hmac.compare_digest(token, expected)
+
+
+def _login_page(error: str = "") -> str:
+    err_html = f"<p style='color:#c62828;font-size:.85rem'>{escape(error)}</p>" if error else ""
+    body = (
+        "<h1>Dashboard Login</h1>"
+        f"{err_html}"
+        "<form method='post' action='/dashboard/login'>"
+        "<input type='password' name='password' placeholder='Password' "
+        "style='font-family:monospace;padding:6px 8px;font-size:.9rem;width:260px' autofocus>"
+        " <button type='submit' style='padding:6px 12px;font-size:.9rem'>Log in</button>"
+        "</form>"
+    )
+    return _html_page("Dashboard — Login", body)
+
+
+@app.post("/dashboard/login", response_class=HTMLResponse)
+async def dashboard_login(password: str = Form()):
+    if not hmac.compare_digest(password, os.environ["DB_PASSWORD"]):
+        return HTMLResponse(_login_page("Wrong password."), status_code=401)
+    resp = RedirectResponse("/dashboard", status_code=303)
+    resp.set_cookie("dash_token", _make_token(password), httponly=True, samesite="lax")
+    return resp
+
+
 @app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(notebook: str | None = None):
+async def dashboard(notebook: str | None = None, dash_token: str | None = Cookie(None)):
+    if not _check_auth(dash_token):
+        return HTMLResponse(_login_page())
     conn = await connect()
     try:
         if notebook is None:
